@@ -29,28 +29,9 @@ export function validateInitData(initData) {
     return { valid: false, error: "Missing initData" };
   }
 
-  // In development mode with no bot token, skip validation
+  // Fail-fast if bot token is not configured (no anonymous bypass)
   if (!config.telegram.botToken || config.telegram.botToken === "YOUR_BOT_TOKEN_HERE") {
-    // Try to parse user from initData anyway (dev convenience)
-    try {
-      const params = new URLSearchParams(initData);
-      const userStr = params.get("user");
-      if (userStr) {
-        return { valid: true, user: JSON.parse(userStr) };
-      }
-    } catch { /* ignore */ }
-    // Return a dev user if nothing parseable
-    return {
-      valid: true,
-      user: {
-        id: 1,
-        first_name: "Dev",
-        last_name: "User",
-        username: "dev_user",
-        language_code: "en",
-        is_premium: false,
-      },
-    };
+    return { valid: false, error: "Server not configured: TELEGRAM_BOT_TOKEN missing" };
   }
 
   try {

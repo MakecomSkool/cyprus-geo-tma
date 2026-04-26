@@ -21,7 +21,10 @@ export function getSocket() {
     transports: ["websocket", "polling"],
     reconnection: true,
     reconnectionDelay: 1000,
-    reconnectionAttempts: Infinity,
+    reconnectionDelayMax: 30_000,
+    randomizationFactor: 0.5,
+    reconnectionAttempts: 20,
+    timeout: 10_000,
   });
 
   socket.on("connect", () => {

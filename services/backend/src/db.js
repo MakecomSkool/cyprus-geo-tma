@@ -10,13 +10,19 @@ const { Pool } = pg;
 
 export const pool = new Pool(
   config.db.connectionString
-    ? { connectionString: config.db.connectionString }
+    ? {
+        connectionString: config.db.connectionString,
+        statement_timeout: 5000,
+        query_timeout: 5000,
+      }
     : {
         host: config.db.host,
         port: config.db.port,
         user: config.db.user,
         password: config.db.password,
         database: config.db.database,
+        statement_timeout: 5000,
+        query_timeout: 5000,
       }
 );
 

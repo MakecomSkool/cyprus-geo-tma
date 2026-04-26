@@ -172,7 +172,7 @@ async function removeFavorite(request, reply) {
  * Register user/favorites routes.
  */
 export default async function usersRoutes(fastify) {
-  fastify.get("/api/users/me", getProfile);
-  fastify.post("/api/favorites", addFavorite);
-  fastify.delete("/api/favorites/:placeId", removeFavorite);
+  fastify.get("/api/users/me", { preHandler: fastify.authenticate }, getProfile);
+  fastify.post("/api/favorites", { preHandler: fastify.authenticate }, addFavorite);
+  fastify.delete("/api/favorites/:placeId", { preHandler: fastify.authenticate }, removeFavorite);
 }

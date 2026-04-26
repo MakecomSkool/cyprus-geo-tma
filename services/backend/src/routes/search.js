@@ -73,10 +73,18 @@ async function searchPlaces(request, reply) {
     ) AS rank`);
 
     // Highlight: headline for name and description
-    selects.push(`ts_headline('simple', p.name, plainto_tsquery('simple', $${paramIdx}),
-      'StartSel=<mark>, StopSel=</mark>, MaxFragments=1') AS hl_name`);
-    selects.push(`ts_headline('simple', COALESCE(p.description, ''), plainto_tsquery('simple', $${paramIdx}),
-      'StartSel=<mark>, StopSel=</mark>, MaxFragments=1, MaxWords=20') AS hl_desc`);
+    // NOTE: we strip HTML tags server-side to prevent XSS.
+    // Frontend should use these as plain text (mark positions client-side).
+    selects.push(`regexp_replace(
+      ts_headline('simple', p.name, plainto_tsquery('simple', $${paramIdx}),
+        'StartSel=«, StopSel=», MaxFragments=1'),
+      '<[^>]*>', '', 'g'
+    ) AS hl_name`);
+    selects.push(`regexp_replace(
+      ts_headline('simple', COALESCE(p.description, ''), plainto_tsquery('simple', $${paramIdx}),
+        'StartSel=«, StopSel=», MaxFragments=1, MaxWords=20'),
+      '<[^>]*>', '', 'g'
+    ) AS hl_desc`);
 
     orderBy = "rank DESC";
   }

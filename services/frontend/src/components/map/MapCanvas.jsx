@@ -17,8 +17,10 @@ import useMapStore from "../../store/useMapStore";
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
-const CYPRUS_CENTER = [33.27, 34.79];
-const CYPRUS_ZOOM = 10;
+const CYPRUS_CENTER = [33.43, 35.13];
+const CYPRUS_ZOOM = 9;
+// Bounding box: SW corner → NE corner (all of Cyprus incl. Northern)
+const CYPRUS_BOUNDS = [[32.20, 34.50], [34.65, 35.75]];
 
 // ── Wikimapia-style colors ──────────────────────────────────
 const FILL_DEFAULT = "rgba(255, 140, 0, 0.10)";
@@ -74,7 +76,7 @@ function addDataLayers(map) {
     map.addSource("places", {
       type: "vector",
       tiles: [`${API_BASE}/api/tiles/{z}/{x}/{y}.mvt`],
-      minzoom: 0,
+      minzoom: 8,
       maxzoom: 16,
       promoteId: "wikimapia_id",
     });
@@ -251,7 +253,9 @@ export default function MapCanvas({ onPlaceClick }) {
       zoom: CYPRUS_ZOOM,
       attributionControl: false,
       maxZoom: 19,
-      minZoom: 7,
+      minZoom: 8,
+      maxBounds: CYPRUS_BOUNDS,
+      renderWorldCopies: false,
       pitchWithRotate: false,
       dragRotate: false,
     });

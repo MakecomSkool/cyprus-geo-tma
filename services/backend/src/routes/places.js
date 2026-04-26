@@ -4,6 +4,7 @@
  */
 
 import { query } from "../db.js";
+import { bboxIntersectsCyprus } from "../lib/cyprusBounds.js";
 
 /**
  * GET /api/places?bbox=minLon,minLat,maxLon,maxLat
@@ -41,6 +42,13 @@ async function getPlaces(request, reply) {
   if (minLon < -180 || maxLon > 180 || minLat < -90 || maxLat > 90) {
     return reply.code(400).send({
       error: "Invalid bbox: coordinates out of range (lon: -180..180, lat: -90..90)",
+    });
+  }
+
+  // Reject requests outside Cyprus
+  if (!bboxIntersectsCyprus(minLon, minLat, maxLon, maxLat)) {
+    return reply.code(400).send({
+      error: "bbox outside Cyprus region",
     });
   }
 

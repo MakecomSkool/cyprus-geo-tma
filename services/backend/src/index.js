@@ -5,10 +5,12 @@
 
 import Fastify from "fastify";
 import cors from "@fastify/cors";
+import rateLimit from "@fastify/rate-limit";
 import { createServer } from "node:http";
 
 import { config } from "./config.js";
 import { pool } from "./db.js";
+import authPlugin from "./plugins/auth.js";
 import placesRoutes from "./routes/places.js";
 import clustersRoutes from "./routes/clusters.js";
 import placeDetailsRoutes from "./routes/placeDetails.js";
@@ -35,10 +37,25 @@ const fastify = Fastify({
   },
 });
 
-// ── CORS ───────────────────────────────────────────────────────
+// ── CORS — whitelist Telegram in production ────────────────────
+const corsOrigin = process.env.NODE_ENV === "production"
+  ? ["https://web.telegram.org", "https://t.me"]
+  : true; // allow all in dev
+
 await fastify.register(cors, {
-  origin: config.corsOrigin === "*" ? true : config.corsOrigin.split(","),
+  origin: corsOrigin,
 });
+
+// ── Rate limiting ──────────────────────────────────────────────
+await fastify.register(rateLimit, {
+  global: true,
+  max: 200,
+  timeWindow: "1 minute",
+  keyGenerator: (req) => req.userId || req.ip,
+});
+
+// ── Auth plugin (provides fastify.authenticate preHandler) ─────
+await fastify.register(authPlugin);
 
 // ── Healthcheck ────────────────────────────────────────────────
 fastify.get("/healthz", async () => {

@@ -203,5 +203,8 @@ async function createReview(request, reply) {
  */
 export default async function reviewsRoutes(fastify) {
   fastify.get("/api/places/:id/reviews", getReviews);
-  fastify.post("/api/places/:id/reviews", createReview);
+  fastify.post("/api/places/:id/reviews", {
+    preHandler: fastify.authenticate,
+    config: { rateLimit: { max: 5, timeWindow: "1 minute" } },
+  }, createReview);
 }
