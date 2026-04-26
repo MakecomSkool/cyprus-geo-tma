@@ -1,0 +1,77 @@
+/* src/components/chat/ChatInput.css */
+
+.chat-input-wrap {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  padding-bottom: max(var(--s-2), env(safe-area-inset-bottom));
+  border-top: 1px solid var(--separator);
+  background: var(--bg);
+  flex-shrink: 0;
+}
+
+.chat-textarea {
+  flex: 1;
+  min-height: 36px;
+  max-height: 126px; /* ~5 lines */
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--separator);
+  background: var(--bg-secondary);
+  color: var(--text);
+  font-size: 16px;
+  font-family: var(--font-stack);
+  line-height: 22px;
+  resize: none;
+  outline: none;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transition: border-color var(--dur-fast);
+}
+
+.chat-textarea:focus {
+  border-color: var(--primary);
+}
+
+.chat-textarea::placeholder {
+  color: var(--text-secondary);
+}
+
+.chat-textarea:disabled {
+  opacity: 0.5;
+}
+
+/* ── Send button ──────────────────────────────────────────── */
+.chat-send-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-full);
+  border: none;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: default;
+  transition:
+    background var(--dur-fast),
+    color var(--dur-fast),
+    transform var(--dur-fast) var(--ease-spring);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chat-send-active {
+  background: var(--primary);
+  color: var(--on-primary);
+  cursor: pointer;
+}
+
+.chat-send-active:active {
+  transform: scale(0.90);
+}
+
+.chat-send-btn:disabled {
+  cursor: default;
+}

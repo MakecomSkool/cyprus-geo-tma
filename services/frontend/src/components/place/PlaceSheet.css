@@ -1,0 +1,196 @@
+/* src/components/place/PlaceSheet.css */
+
+/* ── Overlay ──────────────────────────────────────────────── */
+.place-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 40;
+}
+
+/* ── Sheet panel ──────────────────────────────────────────── */
+.place-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 100vh;
+  z-index: 50;
+  background: var(--bg);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  will-change: transform;
+  touch-action: none;
+}
+
+/* ── Peek section ─────────────────────────────────────────── */
+.place-sheet-peek {
+  padding: 0 var(--s-4) var(--s-3);
+  flex-shrink: 0;
+}
+
+.place-sheet-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding-top: var(--s-1);
+}
+
+.place-sheet-title-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.place-sheet-name {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 28px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.place-sheet-subtitle {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.place-sheet-rating {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.place-sheet-online {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--live);
+  font-weight: 500;
+}
+
+/* ── Action row ───────────────────────────────────────────── */
+.place-sheet-actions {
+  display: flex;
+  gap: var(--s-2);
+  margin-top: var(--s-3);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.place-sheet-actions::-webkit-scrollbar {
+  display: none;
+}
+
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 64px;
+  padding: var(--s-2) var(--s-3);
+  border: none;
+  border-radius: var(--r-md);
+  background: var(--bg-secondary);
+  color: var(--text);
+  font-size: 11px;
+  font-family: var(--font-stack);
+  font-weight: 500;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--dur-fast), background var(--dur-fast);
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+  background: var(--separator);
+}
+
+.action-btn-active {
+  color: var(--danger);
+}
+
+/* ── Half section (photos + description) ──────────────────── */
+.place-sheet-half {
+  flex-shrink: 0;
+  border-top: 1px solid var(--separator);
+}
+
+.place-sheet-description {
+  padding: var(--s-3) var(--s-4);
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Full section (tabs + content) ────────────────────────── */
+.place-sheet-full {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-top: 1px solid var(--separator);
+  padding-top: var(--s-3);
+}
+
+.place-sheet-tab-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: var(--s-4);
+}
+
+/* Chat tab: remove padding, let ChatView fill entire area */
+.place-sheet-tab-chat {
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Tab placeholder (temporary) */
+.tab-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  padding: var(--s-10) 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* Info section */
+.place-sheet-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: 15px;
+  color: var(--text);
+}
+
+.info-row a {
+  color: var(--link);
+  text-decoration: none;
+}

@@ -1,0 +1,48 @@
+/* src/screens/MapScreen.css */
+
+.map-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── Top overlay: search + chips ──────────────────────────── */
+.map-overlay-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-3) var(--s-4) 0;
+  padding-top: calc(env(safe-area-inset-top, 0px) + var(--s-3));
+  pointer-events: none;
+}
+
+.map-overlay-top > * {
+  pointer-events: auto;
+}
+
+/* Search pill on map */
+.map-search-pill {
+  box-shadow: var(--shadow-2);
+}
+
+/* ── Geo FAB ──────────────────────────────────────────────── */
+.map-fab-geo {
+  position: absolute;
+  right: var(--s-4);
+  bottom: calc(49px + env(safe-area-inset-bottom, 0px) + var(--s-4));
+  z-index: 20;
+}
+
+/* ── Style/Layers FAB (top-right, below chips) ────────────── */
+.map-fab-layers {
+  position: absolute;
+  right: var(--s-4);
+  top: calc(env(safe-area-inset-top, 0px) + 94px);
+  z-index: 20;
+}

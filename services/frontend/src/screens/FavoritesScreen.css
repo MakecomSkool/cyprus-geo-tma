@@ -1,0 +1,205 @@
+/* src/screens/FavoritesScreen.css */
+
+.favorites-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: calc(49px + env(safe-area-inset-bottom, 0px));
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+.fav-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: calc(env(safe-area-inset-top, 0px) + var(--s-4)) var(--s-4) var(--s-3);
+}
+
+.fav-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.fav-count {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ── Segmented control ────────────────────────────────────── */
+.fav-segments {
+  display: flex;
+  gap: var(--s-2);
+  padding: 0 var(--s-4) var(--s-3);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.fav-segments::-webkit-scrollbar { display: none; }
+
+.fav-segment {
+  flex-shrink: 0;
+  padding: var(--s-2) var(--s-4);
+  border-radius: var(--r-full);
+  border: 1px solid var(--separator);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: all var(--dur-fast);
+  white-space: nowrap;
+}
+
+.fav-segment-active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+/* ── Card list ────────────────────────────────────────────── */
+.fav-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--s-4);
+  -webkit-overflow-scrolling: touch;
+}
+
+.fav-card {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  width: 100%;
+  padding: var(--s-3) 0;
+  border: none;
+  border-bottom: 1px solid var(--separator);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--dur-fast);
+}
+
+.fav-card:active {
+  background: var(--bg-secondary);
+}
+
+.fav-card:last-child {
+  border-bottom: none;
+}
+
+.fav-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-sm);
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.fav-card-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fav-card-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fav-card-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.fav-card-arrow {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  opacity: 0.4;
+}
+
+/* ── Loading skeleton ─────────────────────────────────────── */
+.fav-card-loading {
+  pointer-events: none;
+}
+
+.fav-card-skeleton-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-sm);
+  background: var(--separator);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.fav-card-skeleton-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeleton-bar {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--separator);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-bar.w60 { width: 60%; }
+.skeleton-bar.w40 { width: 40%; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* ── Empty state ──────────────────────────────────────────── */
+.fav-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-3);
+  padding: var(--s-10) 0;
+  text-align: center;
+}
+
+.fav-empty-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.fav-empty-hint {
+  font-size: 13px;
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.fav-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--separator);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

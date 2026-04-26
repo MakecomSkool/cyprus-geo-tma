@@ -1,0 +1,55 @@
+/* src/components/map/CategoryChips.css */
+
+.chips-scroll {
+  display: flex;
+  gap: var(--s-2);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 var(--s-4);
+  /* Hide scrollbar */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.chips-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 var(--s-3);
+  border-radius: var(--r-full);
+  border: 1px solid var(--separator);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  color: var(--text);
+  font-size: 13px;
+  font-family: var(--font-stack);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition:
+    background var(--dur-fast),
+    color var(--dur-fast),
+    border-color var(--dur-fast),
+    transform var(--dur-fast);
+}
+
+.chip:active {
+  transform: scale(0.95);
+}
+
+.chip-active {
+  background: var(--primary);
+  color: var(--on-primary);
+  border-color: var(--primary);
+}

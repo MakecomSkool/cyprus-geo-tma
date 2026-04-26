@@ -1,0 +1,56 @@
+/* src/components/ui/IconButton.css */
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--r-full);
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition:
+    transform var(--dur-fast) var(--ease-ios),
+    background var(--dur-fast);
+}
+
+/* ── Variants ──────────────────────────────────────────── */
+.icon-btn-default {
+  background: transparent;
+  color: var(--text);
+}
+
+.icon-btn-default:active:not(:disabled) {
+  background: var(--bg-secondary);
+  transform: scale(0.92);
+}
+
+.icon-btn-primary {
+  background: var(--primary);
+  color: var(--on-primary);
+  box-shadow: var(--shadow-2);
+}
+
+.icon-btn-primary:active:not(:disabled) {
+  transform: scale(0.92);
+  filter: brightness(0.92);
+}
+
+.icon-btn-glass {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  color: var(--text);
+  box-shadow: var(--shadow-1);
+}
+
+.icon-btn-glass:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+/* ── States ────────────────────────────────────────────── */
+.icon-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}

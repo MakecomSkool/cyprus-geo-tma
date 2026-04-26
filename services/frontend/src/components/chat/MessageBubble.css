@@ -1,0 +1,196 @@
+/* src/components/chat/MessageBubble.css */
+
+/* ── Row layout ───────────────────────────────────────────── */
+.msg-row {
+  display: flex;
+  gap: var(--s-2);
+  animation: scale-in 150ms var(--ease-spring);
+}
+
+.msg-row-own {
+  justify-content: flex-end;
+}
+
+.msg-row-other {
+  justify-content: flex-start;
+}
+
+/* ── Avatar ───────────────────────────────────────────────── */
+.msg-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.msg-avatar-spacer {
+  width: 28px;
+  flex-shrink: 0;
+}
+
+/* ── Bubble wrapper (contains bubble + reactions + picker) ── */
+.msg-bubble-wrap {
+  max-width: 75%;
+  position: relative;
+}
+
+/* ── Bubble ───────────────────────────────────────────────── */
+.msg-bubble {
+  padding: 8px 12px;
+  border-radius: 18px;
+  font-size: 15px;
+  line-height: 1.4;
+  word-break: break-word;
+  position: relative;
+  cursor: pointer;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.msg-own {
+  background: var(--primary);
+  color: var(--on-primary);
+  border-bottom-right-radius: 4px;
+}
+
+.msg-other {
+  background: var(--bg-secondary);
+  color: var(--text);
+  border-bottom-left-radius: 4px;
+}
+
+/* ── Optimistic / Failed states ───────────────────────────── */
+.bubble-sending {
+  opacity: 0.6;
+}
+
+.bubble-failed {
+  opacity: 1;
+  border: 1.5px solid var(--danger);
+}
+
+/* ── Author name ──────────────────────────────────────────── */
+.msg-author {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--link);
+  margin-bottom: 2px;
+}
+
+.msg-own .msg-author {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ── Meta (time + status) ─────────────────────────────────── */
+.msg-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+  margin-top: 2px;
+}
+
+.msg-time {
+  font-size: 11px;
+  opacity: 0.55;
+}
+
+.msg-failed-icon {
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* ── Reactions pills ──────────────────────────────────────── */
+.msg-reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.msg-reactions-own {
+  justify-content: flex-end;
+}
+
+.msg-reaction-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--separator);
+  background: var(--bg-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: all var(--dur-fast);
+}
+
+.msg-reaction-pill:active {
+  transform: scale(0.9);
+}
+
+.msg-reaction-emoji {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.msg-reaction-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 8px;
+  text-align: center;
+}
+
+/* ── Emoji picker (popup) ─────────────────────────────────── */
+.msg-emoji-picker {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  display: flex;
+  gap: 2px;
+  padding: 4px 6px;
+  border-radius: 20px;
+  background: var(--bg);
+  border: 1px solid var(--separator);
+  box-shadow: var(--shadow-3);
+  z-index: 10;
+  animation: scale-in 120ms var(--ease-spring);
+}
+
+.msg-emoji-picker-own {
+  left: auto;
+  right: 0;
+}
+
+.msg-emoji-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  border-radius: var(--r-full);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--dur-fast), background var(--dur-fast);
+}
+
+.msg-emoji-btn:hover {
+  background: var(--bg-secondary);
+  transform: scale(1.15);
+}
+
+.msg-emoji-btn:active {
+  transform: scale(0.9);
+}

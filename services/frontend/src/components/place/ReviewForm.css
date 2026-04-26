@@ -1,0 +1,104 @@
+/* src/components/place/ReviewForm.css */
+
+.review-form {
+  padding: var(--s-4);
+  border-radius: var(--r-md);
+  background: var(--bg-secondary);
+  animation: scale-in 200ms var(--ease-spring);
+}
+
+.review-form-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: var(--s-4);
+}
+
+/* ── Star picker ──────────────────────────────────────────── */
+.review-form-stars-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-4);
+}
+
+.review-form-stars {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.review-star-btn {
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: transparent;
+  font-size: 32px;
+  color: var(--separator);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color var(--dur-fast), transform var(--dur-fast) var(--ease-spring);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.review-star-btn:active {
+  transform: scale(1.2);
+}
+
+.review-star-active {
+  color: var(--warning);
+}
+
+.review-form-rating-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--warning);
+  min-height: 20px;
+}
+
+/* ── Textarea ─────────────────────────────────────────────── */
+.review-form-textarea {
+  width: 100%;
+  min-height: 80px;
+  max-height: 200px;
+  padding: var(--s-3);
+  border: 1px solid var(--separator);
+  border-radius: var(--r-sm);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  font-family: var(--font-stack);
+  line-height: 1.4;
+  resize: vertical;
+  outline: none;
+  transition: border-color var(--dur-fast);
+}
+
+.review-form-textarea:focus {
+  border-color: var(--primary);
+}
+
+.review-form-textarea::placeholder {
+  color: var(--text-secondary);
+}
+
+/* ── Footer ───────────────────────────────────────────────── */
+.review-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--s-3);
+}
+
+.review-form-count {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.review-form-actions {
+  display: flex;
+  gap: var(--s-2);
+}

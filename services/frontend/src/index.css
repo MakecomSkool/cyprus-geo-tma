@@ -1,0 +1,485 @@
+@import "tailwindcss";
+@import "mapbox-gl/dist/mapbox-gl.css";
+
+/* ═══════════════════════════════════════════════════════════════
+   Cyprus Geo-Social TMA — Design System Tokens
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Spacing (4-pt grid) ────────────────────────────────────── */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+
+  /* ── Radii ───────────────────────────────────────────────────── */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --r-full: 9999px;
+
+  /* ── Typography ──────────────────────────────────────────────── */
+  --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter",
+    "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+
+  /* ── Colors — Telegram-aware with fallbacks ──────────────────── */
+  --bg: var(--tg-theme-bg-color, #ffffff);
+  --bg-secondary: var(--tg-theme-secondary-bg-color, #f2f2f7);
+  --bg-section: var(--tg-theme-section-bg-color, #ffffff);
+  --text: var(--tg-theme-text-color, #000000);
+  --text-secondary: var(--tg-theme-hint-color, #8e8e93);
+  --link: var(--tg-theme-link-color, #0a84ff);
+  --primary: var(--tg-theme-button-color, #0a84ff);
+  --on-primary: var(--tg-theme-button-text-color, #ffffff);
+  --separator: rgba(60, 60, 67, 0.12);
+
+  /* ── Semantic colors ─────────────────────────────────────────── */
+  --success: #34c759;
+  --warning: #ff9500;
+  --danger: #ff3b30;
+  --live: #ff2d55;
+
+  /* ── Shadows ─────────────────────────────────────────────────── */
+  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-3: 0 8px 24px rgba(0, 0, 0, 0.14);
+
+  /* ── Glass ───────────────────────────────────────────────────── */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-bg-strong: rgba(255, 255, 255, 0.88);
+  --glass-blur: blur(24px) saturate(180%);
+
+  /* ── Motion ──────────────────────────────────────────────────── */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-ios: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --dur-fast: 150ms;
+  --dur-base: 250ms;
+  --dur-slow: 400ms;
+}
+
+/* ── Dark mode overrides (Telegram dark theme) ─────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --glass-bg: rgba(30, 30, 30, 0.72);
+    --glass-bg-strong: rgba(30, 30, 30, 0.88);
+    --separator: rgba(200, 200, 200, 0.12);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Keyframe Animations
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Base Reset & Defaults
+   ═══════════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-stack);
+  font-size: 17px;
+  line-height: 1.3;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Safe areas for iPhone notch / Dynamic Island */
+#root {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Typography Utilities
+   ═══════════════════════════════════════════════════════════════ */
+
+.text-caption {
+  font-size: 12px;
+  line-height: 16px;
+}
+.text-footnote {
+  font-size: 13px;
+  line-height: 18px;
+}
+.text-body {
+  font-size: 17px;
+  line-height: 22px;
+}
+.text-headline {
+  font-size: 17px;
+  line-height: 22px;
+  font-weight: 600;
+}
+.text-title3 {
+  font-size: 20px;
+  line-height: 25px;
+  font-weight: 600;
+}
+.text-title2 {
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 600;
+}
+.text-title1 {
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 700;
+}
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Map Container
+   ═══════════════════════════════════════════════════════════════ */
+
+.map-container {
+  width: 100%;
+  height: 100%;
+}
+
+.mapboxgl-ctrl-top-right {
+  top: 10px !important;
+  right: 10px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Bottom Sheet
+   ═══════════════════════════════════════════════════════════════ */
+
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 40;
+  backdrop-filter: blur(2px);
+  animation: fade-in var(--dur-base) var(--ease-ios);
+}
+
+.sheet-panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  max-height: 90vh;
+  background: var(--bg-section);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  will-change: transform;
+}
+
+.sheet-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: var(--r-full);
+  background: var(--text-secondary);
+  opacity: 0.3;
+  margin: var(--s-2) auto var(--s-1);
+  flex-shrink: 0;
+}
+
+.sheet-header {
+  padding: var(--s-2) var(--s-4) var(--s-3);
+  border-bottom: 1px solid var(--separator);
+  flex-shrink: 0;
+}
+
+.sheet-header h2 {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.sheet-header p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Messages
+   ═══════════════════════════════════════════════════════════════ */
+
+.messages-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--s-3) var(--s-4);
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--s-2);
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.message-bubble {
+  max-width: 75%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 15px;
+  line-height: 1.4;
+  word-break: break-word;
+  animation: scale-in var(--dur-fast) var(--ease-spring);
+}
+
+.message-bubble.other {
+  background: var(--bg-secondary);
+  color: var(--text);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.message-bubble.mine {
+  background: var(--primary);
+  color: var(--on-primary);
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+.message-bubble.sending {
+  opacity: 0.6;
+}
+
+.message-bubble.failed {
+  border: 1px solid var(--danger);
+}
+
+.message-meta {
+  font-size: 11px;
+  opacity: 0.6;
+  margin-top: 2px;
+}
+
+.message-author {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--link);
+  margin-bottom: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Chat Input
+   ═══════════════════════════════════════════════════════════════ */
+
+.chat-input-bar {
+  display: flex;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  padding-bottom: max(var(--s-2), env(safe-area-inset-bottom));
+  border-top: 1px solid var(--separator);
+  background: var(--bg-section);
+  flex-shrink: 0;
+}
+
+.chat-input-bar input {
+  flex: 1;
+  height: 36px;
+  padding: 0 var(--s-3);
+  border-radius: 18px;
+  border: 1px solid var(--separator);
+  background: var(--bg-secondary);
+  color: var(--text);
+  font-size: 15px;
+  font-family: var(--font-stack);
+  outline: none;
+  transition: border-color var(--dur-fast);
+}
+
+.chat-input-bar input:focus {
+  border-color: var(--primary);
+}
+
+.chat-input-bar input::placeholder {
+  color: var(--text-secondary);
+}
+
+.chat-input-bar button {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-full);
+  border: none;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity var(--dur-fast), transform var(--dur-fast);
+}
+
+.chat-input-bar button:active {
+  transform: scale(0.92);
+}
+
+.chat-input-bar button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Empty State
+   ═══════════════════════════════════════════════════════════════ */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-8);
+  color: var(--text-secondary);
+  text-align: center;
+  gap: var(--s-2);
+  animation: fade-in var(--dur-slow) var(--ease-ios);
+}
+
+.empty-state .icon {
+  font-size: 32px;
+  opacity: 0.4;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Spinner
+   ═══════════════════════════════════════════════════════════════ */
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--bg-secondary);
+  border-top-color: var(--primary);
+  border-radius: var(--r-full);
+  animation: spin 0.7s linear infinite;
+}
+
+.spinner-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-4);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Glass Utilities
+   ═══════════════════════════════════════════════════════════════ */
+
+.glass {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+.glass-strong {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+/* ── Mapbox Tooltip (Wikimapia-style) ──────────────────────── */
+.place-tooltip .mapboxgl-popup-content {
+  background: rgba(255, 248, 230, 0.95);
+  border: 1px solid rgba(200, 140, 0, 0.5);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #5a3000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+}
+
+.place-tooltip .mapboxgl-popup-tip {
+  border-top-color: rgba(200, 140, 0, 0.5);
+}
+
+/* ── Map container ─────────────────────────────────────────── */
+.map-container {
+  width: 100%;
+  height: 100%;
+}
+

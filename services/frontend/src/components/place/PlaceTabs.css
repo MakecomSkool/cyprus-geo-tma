@@ -1,0 +1,62 @@
+/* src/components/place/PlaceTabs.css */
+
+.place-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  margin: 0 var(--s-4);
+  background: var(--bg-secondary);
+  border-radius: var(--r-sm);
+  position: relative;
+}
+
+.place-tab {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-family: var(--font-stack);
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: calc(var(--r-sm) - 2px);
+  -webkit-tap-highlight-color: transparent;
+  transition: color var(--dur-fast);
+  z-index: 1;
+}
+
+.place-tab-active {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Animated pill indicator behind active tab */
+.place-tab-indicator {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  border-radius: calc(var(--r-sm) - 2px);
+  box-shadow: var(--shadow-1);
+  z-index: -1;
+}
+
+.place-tab-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--on-primary);
+  background: var(--primary);
+  border-radius: var(--r-full);
+  padding: 0 5px;
+  min-width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}

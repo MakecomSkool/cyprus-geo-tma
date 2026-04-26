@@ -1,0 +1,144 @@
+/* src/screens/OnboardingScreen.css */
+
+.onboarding {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Animated background ──────────────────────────────────── */
+.onboarding-bg {
+  position: absolute;
+  inset: 0;
+  transition: background 0.6s var(--ease-ios);
+  pointer-events: none;
+}
+
+/* ── Skip button ──────────────────────────────────────────── */
+.onboarding-skip {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + var(--s-3));
+  right: var(--s-4);
+  z-index: 2;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-family: var(--font-stack);
+  font-weight: 500;
+  cursor: pointer;
+  padding: var(--s-2) var(--s-3);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Slide content area ───────────────────────────────────── */
+.onboarding-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--s-8);
+  position: relative;
+  z-index: 1;
+}
+
+.onboarding-slide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--s-5);
+  max-width: 340px;
+}
+
+/* ── Icon ─────────────────────────────────────────────────── */
+.onboarding-icon-wrap {
+  position: relative;
+  margin-bottom: var(--s-4);
+}
+
+.onboarding-icon-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: var(--r-full);
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.onboarding-emoji {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.onboarding-icon-glow {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: var(--r-full);
+  top: 0;
+  left: 0;
+  opacity: 0.12;
+  filter: blur(30px);
+  animation: pulse-ring 3s ease-in-out infinite;
+}
+
+/* ── Text ─────────────────────────────────────────────────── */
+.onboarding-title {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.onboarding-desc {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  max-width: 300px;
+}
+
+/* ── Bottom area ──────────────────────────────────────────── */
+.onboarding-bottom {
+  flex-shrink: 0;
+  padding: var(--s-6) var(--s-6);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--s-6));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-5);
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Dots ─────────────────────────────────────────────────── */
+.onboarding-dots {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.onboarding-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-full);
+  border: none;
+  background: var(--separator);
+  cursor: pointer;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    width var(--dur-base) var(--ease-spring),
+    background var(--dur-base);
+}
+
+.onboarding-dot-active {
+  width: 24px;
+  border-radius: 4px;
+}

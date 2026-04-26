@@ -1,0 +1,40 @@
+/* src/components/map/TabBar.css */
+
+.tab-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: calc(49px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  border-top: 0.5px solid var(--separator);
+}
+
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-family: var(--font-stack);
+  font-weight: 500;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color var(--dur-fast);
+}
+
+.tab-active {
+  color: var(--primary);
+}
+
+.tab-item:active {
+  transform: scale(0.92);
+}

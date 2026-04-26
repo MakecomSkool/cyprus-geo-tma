@@ -1,0 +1,64 @@
+/* src/components/ui/SearchInput.css */
+
+.search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 44px;
+  border-radius: var(--r-xl);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+  transition: box-shadow var(--dur-fast);
+}
+
+.search-input-wrap:focus-within {
+  box-shadow: var(--shadow-2), 0 0 0 2px var(--primary);
+}
+
+.search-input-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--text-secondary);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.search-input {
+  width: 100%;
+  height: 100%;
+  padding: 0 40px 0 42px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 16px;
+  font-family: var(--font-stack);
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.search-input-clear {
+  position: absolute;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--r-full);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--dur-fast);
+}
+
+.search-input-clear:active {
+  transform: scale(0.88);
+}

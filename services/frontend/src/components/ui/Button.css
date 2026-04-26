@@ -1,0 +1,89 @@
+/* src/components/ui/Button.css */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-stack);
+  font-weight: 600;
+  border-radius: 14px;
+  transition:
+    transform var(--dur-fast) var(--ease-ios),
+    opacity var(--dur-fast),
+    background var(--dur-fast);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* ── Sizes ─────────────────────────────────────────────── */
+.btn-default {
+  height: 50px;
+  padding: 0 var(--s-6);
+  font-size: 17px;
+}
+
+.btn-sm {
+  height: 36px;
+  padding: 0 var(--s-4);
+  font-size: 14px;
+  border-radius: var(--r-sm);
+}
+
+.btn-lg {
+  height: 56px;
+  padding: 0 var(--s-8);
+  font-size: 17px;
+}
+
+.btn-full {
+  height: 50px;
+  width: 100%;
+  padding: 0 var(--s-6);
+  font-size: 17px;
+}
+
+/* ── Variants ──────────────────────────────────────────── */
+.btn-primary {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: scale(0.97);
+  filter: brightness(0.92);
+}
+
+.btn-secondary {
+  background: var(--bg-secondary);
+  color: var(--text);
+}
+
+.btn-secondary:active:not(:disabled) {
+  transform: scale(0.97);
+  filter: brightness(0.95);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--primary);
+}
+
+.btn-ghost:active:not(:disabled) {
+  background: rgba(10, 132, 255, 0.08);
+  transform: scale(0.97);
+}
+
+/* ── States ────────────────────────────────────────────── */
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+  transform: none;
+}
+
+/* ── Spinner ───────────────────────────────────────────── */
+.btn-spinner {
+  animation: spin 0.7s linear infinite;
+}

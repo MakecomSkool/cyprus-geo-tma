@@ -1,0 +1,119 @@
+/* src/components/place/ReviewsTab.css */
+
+.reviews-tab {
+  padding: var(--s-3) 0;
+}
+
+/* ── Rating summary ───────────────────────────────────────── */
+.reviews-summary {
+  display: flex;
+  gap: var(--s-5);
+  padding: var(--s-4);
+  margin-bottom: var(--s-4);
+  border-radius: var(--r-md);
+  background: var(--bg-secondary);
+}
+
+.reviews-summary-big {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-1);
+  min-width: 72px;
+}
+
+.reviews-big-number {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+}
+
+.reviews-total {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* ── Distribution bars ────────────────────────────────────── */
+.reviews-bars {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  justify-content: center;
+}
+
+.reviews-bar-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.reviews-bar-label {
+  width: 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.reviews-bar-track {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--separator);
+  overflow: hidden;
+}
+
+.reviews-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--warning);
+  transition: width 0.6s var(--ease-spring);
+  min-width: 2px;
+}
+
+.reviews-bar-count {
+  width: 20px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: left;
+  flex-shrink: 0;
+}
+
+/* ── Skeletons ────────────────────────────────────────────── */
+.reviews-skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.review-skeleton {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+/* ── Empty state ──────────────────────────────────────────── */
+.reviews-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-10) 0;
+  color: var(--text-secondary);
+  text-align: center;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.reviews-empty-sub {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+/* ── Reviews list ─────────────────────────────────────────── */
+.reviews-list {
+  margin-top: var(--s-2);
+}
