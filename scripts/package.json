@@ -1,0 +1,11 @@
+{
+  "name": "cyprus-geo-scripts",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "fast-xml-parser": "^5.7.2",
+    "pg": "*",
+    "playwright": "^1.59.1"
+  }
+}

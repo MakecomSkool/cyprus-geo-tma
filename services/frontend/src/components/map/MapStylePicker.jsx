@@ -15,6 +15,11 @@ import "./MapStylePicker.css";
 
 const STYLES = [
   {
+    key: "wikimapia",
+    label: "Wikimapia",
+    preview: "https://i.wikimapia.org/?x=18&y=11&zoom=5&type=1&lng=1",
+  },
+  {
     key: "osm",
     label: "Карта",
     preview: "https://tile.openstreetmap.org/5/17/11.png",
@@ -35,6 +40,7 @@ const STYLES = [
     preview: "https://api.mapbox.com/styles/v1/mapbox/dark-v11/tiles/5/17/11?access_token=" + (import.meta.env.VITE_MAPBOX_TOKEN || ""),
   },
 ];
+
 
 export default function MapStylePicker() {
   const [open, setOpen] = useState(false);

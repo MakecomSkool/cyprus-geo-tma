@@ -39,7 +39,7 @@ const useMapStore = create((set, get) => ({
   /** Active category filter */
   category: null,
 
-  /** Map base style: 'osm' | 'satellite' | 'hybrid' | 'dark' */
+  /** Map base style: 'wikimapia' | 'osm' | 'satellite' | 'hybrid' | 'dark' */
   currentStyle: localStorage.getItem("mapStyle") || "osm",
 
   // ── Actions ────────────────────────────────────────────

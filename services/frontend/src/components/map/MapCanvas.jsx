@@ -1,439 +1,369 @@
 /**
  * src/components/map/MapCanvas.jsx
  *
- * Core Mapbox GL map canvas with MVT vector tiles + multi-style support.
- *
- * Places are loaded as MVT from /api/tiles/{z}/{x}/{y}.mvt (PostGIS on-the-fly).
- * Falls back to static GeoJSON if backend is unavailable.
- *
- * Base styles: OSM (raster), Satellite, Hybrid, Dark.
- * On every style change, data layers are re-applied via 'style.load'.
+ * Leaflet map — Wikimapia-like behaviour:
+ *  • Click on map → find ALL polygons at that point
+ *  • If 1 polygon → open place sheet directly
+ *  • If many → show picker popup (like Wikimapia does)
+ *  • Hover → highlight polygon + tooltip
  */
 
 import { useRef, useEffect } from "react";
-import mapboxgl from "mapbox-gl";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import useMapStore from "../../store/useMapStore";
 
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
-const CYPRUS_CENTER = [33.43, 35.13];
-const CYPRUS_ZOOM = 9;
-// Bounding box: SW corner → NE corner (all of Cyprus incl. Northern)
-const CYPRUS_BOUNDS = [[32.20, 34.50], [34.65, 35.75]];
+const CYPRUS_CENTER = [35.13, 33.43];
+const CYPRUS_ZOOM   = 10;
+const CYPRUS_BOUNDS = L.latLngBounds(
+  L.latLng(34.50, 32.20),
+  L.latLng(35.75, 34.65)
+);
 
-// ── Wikimapia-style colors ──────────────────────────────────
-const FILL_DEFAULT = "rgba(255, 140, 0, 0.10)";
-const FILL_HOVER   = "rgba(255, 140, 0, 0.30)";
-const FILL_ACTIVE  = "rgba(255, 140, 0, 0.45)";
-const LINE_DEFAULT = "rgba(200, 100, 0, 0.55)";
-const LINE_HOVER   = "rgba(200, 100, 0, 0.85)";
-const LINE_ACTIVE  = "rgba(220, 80, 0, 1)";
-const LIVE_COLOR   = "#FF2D55";
-
-// MVT source layer name (must match ST_AsMVT layer name in tiles.js)
-const MVT_LAYER = "places";
-
-// ── Style definitions ───────────────────────────────────────
-const OSM_STYLE = {
-  version: 8,
-  name: "OSM",
-  sources: {
-    "osm-tiles": {
-      type: "raster",
-      tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-      tileSize: 256,
-      attribution: '© <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
-      maxzoom: 19,
-    },
-  },
-  layers: [
-    {
-      id: "osm-tiles-layer",
-      type: "raster",
-      source: "osm-tiles",
-      minzoom: 0,
-      maxzoom: 19,
-    },
-  ],
-  glyphs: "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
+// ── Styles — precise Wikimapia color palette ─────────────────────────────
+// DEFAULT: fillOpacity=0 (transparent) — only border visible
+// HOVER:   fillOpacity=0.45 — fill appears on mouseover
+// ACTIVE:  fillOpacity=0.50 + orange border
+const CAT_STYLE = {
+  wikimapia:  { color: "#9e948a", weight: 1, fillColor: "#dfd6cb", fillOpacity: 0 },
+  park:       { color: "#6aaa50", weight: 1, fillColor: "#c0e8a8", fillOpacity: 0 },
+  beach:      { color: "#5090c8", weight: 1, fillColor: "#b0d8f4", fillOpacity: 0 },
+  hotel:      { color: "#c09030", weight: 1, fillColor: "#f0d898", fillOpacity: 0 },
+  food:       { color: "#c07030", weight: 1, fillColor: "#f0c090", fillOpacity: 0 },
+  religious:  { color: "#9060b8", weight: 1, fillColor: "#e0c8f0", fillOpacity: 0 },
+  education:  { color: "#4060b0", weight: 1, fillColor: "#c0d0f0", fillOpacity: 0 },
+  healthcare: { color: "#b83050", weight: 1, fillColor: "#f0b8c8", fillOpacity: 0 },
+  shopping:   { color: "#a08820", weight: 1, fillColor: "#f0e098", fillOpacity: 0 },
+  district:   { color: "#7090b8", weight: 1.5, fillColor: "#c8d8f0", fillOpacity: 0,
+                dashArray: "8,5" },
+  sport:      { color: "#309878", weight: 1, fillColor: "#a0e0c8", fillOpacity: 0 },
+  parking:    { color: "#7880a0", weight: 1, fillColor: "#c8d0e0", fillOpacity: 0 },
+  transport:  { color: "#4870b8", weight: 1, fillColor: "#b0c8f0", fillOpacity: 0 },
+  military:   { color: "#904030", weight: 1, fillColor: "#f0c8c0", fillOpacity: 0,
+                dashArray: "5,5" },
+  road:       { color: "#a09030", weight: 1, fillColor: "#f0e0a0", fillOpacity: 0 },
 };
 
-const MAPBOX_STYLES = {
-  osm: OSM_STYLE,
-  satellite: "mapbox://styles/mapbox/satellite-v9",
-  hybrid: "mapbox://styles/mapbox/satellite-streets-v12",
-  dark: "mapbox://styles/mapbox/dark-v11",
-};
+const DEFAULT_STYLE = CAT_STYLE.wikimapia;
 
-// ── Feature state helper (includes sourceLayer for MVT) ─────
-const FS = (id) => ({ source: "places", sourceLayer: MVT_LAYER, id });
-
-// ── Helper: add all data layers to map ──────────────────────
-function addDataLayers(map) {
-  // ── Places source: MVT vector tiles from PostGIS ──────────
-  if (!map.getSource("places")) {
-    map.addSource("places", {
-      type: "vector",
-      tiles: [`${API_BASE}/api/tiles/{z}/{x}/{y}.mvt`],
-      minzoom: 8,
-      maxzoom: 16,
-      promoteId: "wikimapia_id",
-    });
-  }
-
-  // ── FILL layer ────────────────────────────────────────────
-  if (!map.getLayer("places-fill")) {
-    map.addLayer({
-      id: "places-fill",
-      type: "fill",
-      source: "places",
-      "source-layer": MVT_LAYER,
-      paint: {
-        "fill-color": [
-          "case",
-          ["boolean", ["feature-state", "active"], false], FILL_ACTIVE,
-          ["boolean", ["feature-state", "hover"], false], FILL_HOVER,
-          FILL_DEFAULT,
-        ],
-        "fill-opacity": [
-          "interpolate", ["linear"], ["zoom"],
-          7, 0.3, 10, 0.7, 14, 0.9,
-        ],
-      },
-    });
-  }
-
-  // ── OUTLINE layer ─────────────────────────────────────────
-  if (!map.getLayer("places-line")) {
-    map.addLayer({
-      id: "places-line",
-      type: "line",
-      source: "places",
-      "source-layer": MVT_LAYER,
-      paint: {
-        "line-color": [
-          "case",
-          ["boolean", ["feature-state", "active"], false], LINE_ACTIVE,
-          ["boolean", ["feature-state", "hover"], false], LINE_HOVER,
-          LINE_DEFAULT,
-        ],
-        "line-width": [
-          "interpolate", ["linear"], ["zoom"],
-          7, 0.3, 10, 0.8, 14, 1.5, 18, 2.5,
-        ],
-        "line-dasharray": [4, 2],
-      },
-    });
-  }
-
-  // ── NAME LABELS ───────────────────────────────────────────
-  if (!map.getLayer("places-labels")) {
-    map.addLayer({
-      id: "places-labels",
-      type: "symbol",
-      source: "places",
-      "source-layer": MVT_LAYER,
-      minzoom: 13,
-      layout: {
-        "text-field": ["get", "name"],
-        "text-font": ["DIN Pro Medium", "Arial Unicode MS Regular"],
-        "text-size": [
-          "interpolate", ["linear"], ["zoom"],
-          13, 10, 15, 12, 18, 14,
-        ],
-        "text-max-width": 8,
-        "text-allow-overlap": false,
-        "text-ignore-placement": false,
-        "text-optional": true,
-        "text-padding": 4,
-        "symbol-placement": "point",
-      },
-      paint: {
-        "text-color": "rgba(80, 40, 0, 0.9)",
-        "text-halo-color": "rgba(255, 255, 255, 0.95)",
-        "text-halo-width": 1.5,
-        "text-halo-blur": 0.5,
-      },
-    });
-  }
-
-  // ── LIVE PULSE source (GeoJSON — always separate from MVT) ─
-  if (!map.getSource("live-places")) {
-    map.addSource("live-places", {
-      type: "geojson",
-      data: { type: "FeatureCollection", features: [] },
-    });
-  }
-
-  if (!map.getLayer("live-pulse-outer")) {
-    map.addLayer({
-      id: "live-pulse-outer",
-      type: "circle",
-      source: "live-places",
-      paint: {
-        "circle-radius": [
-          "interpolate", ["linear"], ["get", "count"],
-          1, 16, 5, 24, 10, 32,
-        ],
-        "circle-color": LIVE_COLOR,
-        "circle-opacity": 0.15,
-        "circle-blur": 1,
-      },
-    });
-  }
-
-  if (!map.getLayer("live-pulse-inner")) {
-    map.addLayer({
-      id: "live-pulse-inner",
-      type: "circle",
-      source: "live-places",
-      paint: {
-        "circle-radius": [
-          "interpolate", ["linear"], ["get", "count"],
-          1, 6, 5, 9, 10, 12,
-        ],
-        "circle-color": LIVE_COLOR,
-        "circle-opacity": 0.7,
-        "circle-stroke-width": 2,
-        "circle-stroke-color": "#ffffff",
-      },
-    });
-  }
-
-  if (!map.getLayer("live-badge")) {
-    map.addLayer({
-      id: "live-badge",
-      type: "symbol",
-      source: "live-places",
-      layout: {
-        "text-field": ["concat", "👥 ", ["to-string", ["get", "count"]]],
-        "text-font": ["DIN Pro Medium", "Arial Unicode MS Regular"],
-        "text-size": 11,
-        "text-offset": [0, -2],
-        "text-anchor": "bottom",
-        "text-allow-overlap": true,
-      },
-      paint: {
-        "text-color": LIVE_COLOR,
-        "text-halo-color": "#fff",
-        "text-halo-width": 1.5,
-      },
-    });
-  }
+// Hover: fill appears with the category color (Wikimapia behaviour)
+function hoverStyle(base) {
+  return { ...base, fillOpacity: 0.45, weight: 2 };
 }
 
+// Selected: orange border + fill stays visible
+const ACTIVE_STYLE = { color: "#e08000", weight: 3, fillColor: "#ffd060", fillOpacity: 0.50 };
+
+// Category icons for picker
+const CAT_ICON = {
+  park: "🌳", beach: "🏖️", hotel: "🏨", food: "🍴",
+  religious: "⛪", education: "🎓", healthcare: "🏥", shopping: "🛍️",
+  district: "🗺️", sport: "⚽", parking: "🅿️", transport: "🚌",
+  military: "🪖", road: "🛣️", wikimapia: "📍",
+};
+
+function getStyle(feature) {
+  return CAT_STYLE[feature.properties?.category] || DEFAULT_STYLE;
+}
+
+// Check if latlng is inside a GeoJSON polygon feature
+function pointInFeature(latlng, feature) {
+  if (!feature.geometry) return false;
+  const pt = [latlng.lng, latlng.lat];
+  const geom = feature.geometry;
+  const rings = geom.type === "Polygon"
+    ? geom.coordinates
+    : geom.type === "MultiPolygon"
+      ? geom.coordinates.flat()
+      : [];
+  for (const ring of rings) {
+    if (pointInRing(pt, ring)) return true;
+  }
+  return false;
+}
+
+function pointInRing(pt, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0], yi = ring[i][1];
+    const xj = ring[j][0], yj = ring[j][1];
+    const intersect = ((yi > pt[1]) !== (yj > pt[1]))
+      && (pt[0] < (xj - xi) * (pt[1] - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+// ── Component ─────────────────────────────────────────────────────────────
 export default function MapCanvas({ onPlaceClick }) {
-  const containerRef = useRef(null);
-  const mapRef = useRef(null);
-  const hoveredIdRef = useRef(null);
-  const dataLoadedRef = useRef(false);
+  const containerRef    = useRef(null);
+  const mapRef          = useRef(null);
+  const geoLayerRef     = useRef(null);
+  const featuresRef     = useRef([]);   // all loaded features for point-in-polygon
+  const activeLayerRef  = useRef(null);
+  const pickerPopupRef  = useRef(null);
+  const loadAbortRef    = useRef(null);
   const onPlaceClickRef = useRef(onPlaceClick);
   onPlaceClickRef.current = onPlaceClick;
 
   const subscribeLive = useMapStore((s) => s.subscribeLive);
-  const livePlaces = useMapStore((s) => s.livePlaces);
   const selectedPlace = useMapStore((s) => s.selectedPlace);
-  const currentStyle = useMapStore((s) => s.currentStyle);
+  const category      = useMapStore((s) => s.category);
 
-  // ── Initialize map ────────────────────────────────────────
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    mapboxgl.accessToken = MAPBOX_TOKEN;
-
-    const initStyle = MAPBOX_STYLES[
-      useMapStore.getState().currentStyle
-    ] || OSM_STYLE;
-
-    const map = new mapboxgl.Map({
-      container: containerRef.current,
-      style: initStyle,
+    const map = L.map(containerRef.current, {
       center: CYPRUS_CENTER,
-      zoom: CYPRUS_ZOOM,
-      attributionControl: false,
-      maxZoom: 19,
+      zoom:   CYPRUS_ZOOM,
       minZoom: 8,
+      maxZoom: 19,
       maxBounds: CYPRUS_BOUNDS,
-      renderWorldCopies: false,
-      pitchWithRotate: false,
-      dragRotate: false,
+      maxBoundsViscosity: 1.0,
+      zoomControl: false,
     });
 
-    // ── style.load: add data layers (init + style change) ───
-    map.on("style.load", () => {
-      addDataLayers(map);
-      dataLoadedRef.current = true;
+    // OSM Humanitarian — beige/clean like Wikimapia
+    L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
+      attribution: '© <a href="https://www.openstreetmap.org/">OSM</a>',
+      maxZoom: 19,
+    }).addTo(map);
+
+    // ── Single GeoJSON layer — all polygons visible ─────────────────────
+    const geoLayer = L.geoJSON(null, {
+      style: getStyle,
+
+      onEachFeature(feature, layer) {
+        const props = feature.properties || {};
+
+        // Hover highlight + tooltip
+        layer.on("mouseover", function () {
+          if (activeLayerRef.current !== this) {
+            const base = getStyle(feature);
+            this.setStyle(hoverStyle(base));
+          }
+          const name = props.name;
+          if (name) {
+            this.bindTooltip(name, {
+              sticky: true, direction: "top", offset: [0, -6],
+              className: "place-tooltip-leaflet",
+            }).openTooltip();
+          }
+        });
+
+        layer.on("mouseout", function () {
+          if (activeLayerRef.current !== this) geoLayer.resetStyle(this);
+          this.unbindTooltip();
+        });
+      },
+    }).addTo(map);
+
+    geoLayerRef.current = geoLayer;
+
+    // ── Map click → find ALL polygons at that point (Wikimapia behaviour) ─
+    map.on("click", (e) => {
+      // Close any open picker
+      if (pickerPopupRef.current) {
+        pickerPopupRef.current.remove();
+        pickerPopupRef.current = null;
+      }
+
+      // Find all features containing the clicked point
+      const hits = featuresRef.current.filter(f => pointInFeature(e.latlng, f));
+      if (hits.length === 0) return;
+
+      // Sort: smallest area first (most specific = most relevant)
+      hits.sort((a, b) => {
+        const area = (f) => {
+          try {
+            const coords = f.geometry.type === "Polygon"
+              ? f.geometry.coordinates[0]
+              : f.geometry.coordinates[0][0];
+            // Rough bounding box area
+            const lons = coords.map(c => c[0]);
+            const lats = coords.map(c => c[1]);
+            return (Math.max(...lons) - Math.min(...lons)) *
+                   (Math.max(...lats) - Math.min(...lats));
+          } catch { return 999; }
+        };
+        return area(a) - area(b);
+      });
+
+      if (hits.length === 1) {
+        // Only one match — open directly
+        openPlace(hits[0], geoLayer, e.latlng);
+      } else {
+        // Multiple matches — show Wikimapia-style picker
+        showPicker(hits, geoLayer, e.latlng, map);
+      }
+    });
+
+    // ── Helper: open a place ─────────────────────────────────────────────
+    function openPlace(feature, gl, latlng) {
+      const props = feature.properties;
+
+      // Highlight on map
+      if (activeLayerRef.current) {
+        try { gl.resetStyle(activeLayerRef.current); } catch {}
+      }
+
+      // Find the Leaflet layer for this feature
+      gl.eachLayer(layer => {
+        if (layer.feature?.properties?.wikimapia_id === props.wikimapia_id) {
+          activeLayerRef.current = layer;
+          layer.setStyle(ACTIVE_STYLE);
+          layer.bringToFront();
+        }
+      });
+
+      onPlaceClickRef.current?.(props.wikimapia_id, {
+        id:           props.wikimapia_id,
+        name:         props.name,
+        description:  props.description,
+        category:     props.category,
+        wikimapia_id: props.wikimapia_id,
+      });
+    }
+
+    // ── Helper: show picker popup ─────────────────────────────────────────
+    function showPicker(hits, gl, latlng, map) {
+      const items = hits.slice(0, 8).map(f => {
+        const p = f.properties;
+        const icon = CAT_ICON[p.category] || "📍";
+        return `<div class="wm-picker-item" data-wid="${p.wikimapia_id}">
+          <span class="wm-picker-icon">${icon}</span>
+          <span class="wm-picker-name">${p.name || `#${p.wikimapia_id}`}</span>
+        </div>`;
+      }).join("");
+
+      const popup = L.popup({
+        closeButton: true,
+        className: "wm-picker-popup",
+        maxWidth: 260,
+        minWidth: 180,
+      })
+        .setLatLng(latlng)
+        .setContent(`<div class="wm-picker">${items}</div>`)
+        .addTo(map);
+
+      pickerPopupRef.current = popup;
+
+      // Attach click handlers after popup renders
+      setTimeout(() => {
+        const el = popup.getElement();
+        if (!el) return;
+        el.querySelectorAll(".wm-picker-item").forEach((div, idx) => {
+          div.addEventListener("click", () => {
+            popup.remove();
+            pickerPopupRef.current = null;
+            openPlace(hits[idx], gl, latlng);
+          });
+        });
+      }, 50);
+    }
+
+    // ── Load polygons for viewport — zoom-aware like Wikimapia ─────────────
+    async function loadPolygons() {
+      const z = map.getZoom();
+
+      if (z < 11) {
+        geoLayer.clearLayers();
+        featuresRef.current = [];
+        return;
+      }
 
       const b = map.getBounds();
-      subscribeLive([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()]);
-    });
+      const bbox = `${b.getWest()},${b.getSouth()},${b.getEast()},${b.getNorth()}`;
 
-    // ── moveend ─────────────────────────────────────────────
+      if (loadAbortRef.current) loadAbortRef.current.abort();
+      const ctrl = new AbortController();
+      loadAbortRef.current = ctrl;
+
+      try {
+        const cat = useMapStore.getState().category;
+        const catParam = cat ? `&category=${cat}` : "";
+        const resp = await fetch(
+          `${API_BASE}/api/places/geojson?bbox=${bbox}${catParam}&zoom=${Math.floor(z)}`,
+          { signal: ctrl.signal }
+        );
+        if (!resp.ok) return;
+        const data = await resp.json();
+
+        // ── Zoom-based visibility (Wikimapia rules) ──────────────────────
+        // minZoom per area: larger = visible earlier
+        const visible = data.features.filter(f => {
+          const area  = f.properties.area_m2 || 0;
+          const cat   = f.properties.category || "wikimapia";
+
+          // Districts: only show at z11-14, hide when zoomed in close
+          if (cat === "district") return z >= 11 && z <= 14;
+
+          // Large areas (parks, beaches, military) — visible from z11
+          if (area > 80_000)  return z >= 11;
+          // Medium (campus, shopping mall) — from z12
+          if (area > 15_000)  return z >= 12;
+          // City objects (hotel, school, church) — from z13
+          if (area > 3_000)   return z >= 13;
+          // Small objects (restaurant, shop) — from z14
+          if (area > 500)     return z >= 14;
+          // Tiny objects (ATM, kiosk) — only close up
+          return z >= 15;
+        });
+
+        // Sort: large → bottom, small → top (so small are clickable)
+        visible.sort((a, b) => (b.properties.area_m2 || 0) - (a.properties.area_m2 || 0));
+
+        geoLayer.clearLayers();
+        geoLayer.addData({ type: "FeatureCollection", features: visible });
+        featuresRef.current = visible;
+      } catch (e) {
+        if (e.name !== "AbortError") console.warn("GeoJSON load:", e);
+      }
+    }
+
+    map.on("moveend", loadPolygons);
+    map.on("zoomend", loadPolygons);
+    loadPolygons();
+
     map.on("moveend", () => {
       const b = map.getBounds();
       subscribeLive([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()]);
     });
-
-    // ── HOVER (feature-state with sourceLayer) ──────────────
-    map.on("mousemove", "places-fill", (e) => {
-      if (!e.features?.length) return;
-      map.getCanvas().style.cursor = "pointer";
-      const fid = e.features[0].id;
-
-      if (hoveredIdRef.current !== null && hoveredIdRef.current !== fid) {
-        map.setFeatureState(FS(hoveredIdRef.current), { hover: false });
-      }
-      hoveredIdRef.current = fid;
-      map.setFeatureState(FS(fid), { hover: true });
-    });
-
-    map.on("mouseleave", "places-fill", () => {
-      map.getCanvas().style.cursor = "";
-      if (hoveredIdRef.current !== null) {
-        map.setFeatureState(FS(hoveredIdRef.current), { hover: false });
-        hoveredIdRef.current = null;
-      }
-    });
-
-    // ── CLICK ───────────────────────────────────────────────
-    map.on("click", "places-fill", (e) => {
-      const feature = e.features?.[0];
-      if (!feature) return;
-      const props = feature.properties;
-      onPlaceClickRef.current?.(props.wikimapia_id || feature.id, {
-        id: props.wikimapia_id || feature.id,
-        name: props.name,
-        description: props.description,
-        category: props.category,
-        wikimapia_id: props.wikimapia_id,
-      });
-    });
-
-    // ── Tooltip ─────────────────────────────────────────────
-    const popup = new mapboxgl.Popup({
-      closeButton: false,
-      closeOnClick: false,
-      offset: 8,
-      className: "place-tooltip",
-    });
-
-    map.on("mousemove", "places-fill", (e) => {
-      if (!e.features?.length) return;
-      const props = e.features[0].properties;
-      popup
-        .setLngLat(e.lngLat)
-        .setHTML(`<strong>${props.name || "—"}</strong>`)
-        .addTo(map);
-    });
-
-    map.on("mouseleave", "places-fill", () => {
-      popup.remove();
-    });
+    const b0 = map.getBounds();
+    subscribeLive([b0.getWest(), b0.getSouth(), b0.getEast(), b0.getNorth()]);
 
     mapRef.current = map;
     window.__mapRef = map;
 
-    return () => {
-      popup.remove();
-      map.remove();
-      mapRef.current = null;
-      delete window.__mapRef;
-    };
+    return () => { map.remove(); mapRef.current = null; delete window.__mapRef; };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Switch style when currentStyle changes ────────────────
+  // Category filter
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-    const newStyle = MAPBOX_STYLES[currentStyle] || OSM_STYLE;
-    map.setStyle(newStyle, { diff: false });
-  }, [currentStyle]);
-
-  // ── Category filter on MVT layers ─────────────────────────
-  const category = useMapStore((s) => s.category);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !dataLoadedRef.current) return;
-
-    const filter = category
-      ? ["==", ["get", "category"], category]
-      : null; // null = show all
-
-    const layers = ["places-fill", "places-line", "places-labels"];
-    for (const layerId of layers) {
-      if (map.getLayer(layerId)) {
-        map.setFilter(layerId, filter);
-      }
-    }
+    mapRef.current?.fire("moveend");
   }, [category]);
 
-  // ── Update live pulse data ────────────────────────────────
+  // Highlight selected place from outside
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !dataLoadedRef.current) return;
-    const source = map.getSource("live-places");
-    if (!source) return;
-
-    const features = [];
-    for (const [placeId, count] of Object.entries(livePlaces)) {
-      if (count <= 0) continue;
-
-      // Query rendered MVT features to get centroid for pulse
-      const rendered = map.querySourceFeatures("places", {
-        sourceLayer: MVT_LAYER,
-        filter: ["==", ["get", "wikimapia_id"], Number(placeId)],
-      });
-
-      if (rendered.length > 0) {
-        const geom = rendered[0].geometry;
-        let center;
-        if (geom.type === "Point") {
-          center = geom.coordinates;
-        } else if (geom.coordinates?.[0]) {
-          const coords = geom.coordinates[0];
-          const lons = coords.map((c) => c[0]);
-          const lats = coords.map((c) => c[1]);
-          center = [
-            (Math.min(...lons) + Math.max(...lons)) / 2,
-            (Math.min(...lats) + Math.max(...lats)) / 2,
-          ];
-        }
-        if (center) {
-          features.push({
-            type: "Feature",
-            geometry: { type: "Point", coordinates: center },
-            properties: { placeId, count },
-          });
-        }
+    const gl = geoLayerRef.current;
+    if (!gl || !selectedPlace?.wikimapia_id) return;
+    gl.eachLayer(layer => {
+      if (layer.feature?.properties?.wikimapia_id === selectedPlace.wikimapia_id) {
+        if (activeLayerRef.current && activeLayerRef.current !== layer)
+          try { gl.resetStyle(activeLayerRef.current); } catch {}
+        activeLayerRef.current = layer;
+        layer.setStyle(ACTIVE_STYLE);
+        layer.bringToFront();
       }
-    }
-    source.setData({ type: "FeatureCollection", features });
-  }, [livePlaces]);
-
-  // ── Active state for selected place ───────────────────────
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !dataLoadedRef.current) return;
-
-    if (selectedPlace?.wikimapia_id) {
-      map.setFeatureState(FS(selectedPlace.wikimapia_id), { active: true });
-    }
-    return () => {
-      if (selectedPlace?.wikimapia_id) {
-        try {
-          map.setFeatureState(FS(selectedPlace.wikimapia_id), { active: false });
-        } catch { /* style may have changed */ }
-      }
-    };
+    });
   }, [selectedPlace]);
 
-  // ── Expose flyTo ──────────────────────────────────────────
+  // flyTo helper
   useEffect(() => {
-    window.__mapFlyTo = (center, zoom = 16) => {
-      mapRef.current?.flyTo({ center, zoom, duration: 800 });
-    };
+    window.__mapFlyTo = (c, z = 16) =>
+      mapRef.current?.flyTo([c[1], c[0]], z, { duration: 0.8 });
     return () => { delete window.__mapFlyTo; };
   }, []);
 

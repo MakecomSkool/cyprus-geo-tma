@@ -9,15 +9,24 @@
 import { query } from "../db.js";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const INT_RE  = /^\d+$/;
 
 async function getPlaceById(request, reply) {
   const { id } = request.params;
 
-  if (!UUID_RE.test(id)) {
-    return reply.code(400).send({ error: "Invalid place ID format (expected UUID)" });
+  const isUuid = UUID_RE.test(id);
+  const isWikiId = INT_RE.test(id);
+
+  if (!isUuid && !isWikiId) {
+    return reply.code(400).send({ error: "Invalid place ID" });
   }
 
   // ── Main place + stats ──────────────────────────────────────
+  const whereClause = isUuid
+    ? "p.id = $1"
+    : "p.wikimapia_id = $1";
+  const paramValue = isUuid ? id : parseInt(id, 10);
+
   const placeResult = await query(
     `SELECT
        p.id,
@@ -40,8 +49,8 @@ async function getPlaceById(request, reply) {
        ps.last_activity_at
      FROM places p
      LEFT JOIN place_stats ps ON ps.place_id = p.id
-     WHERE p.id = $1`,
-    [id]
+     WHERE ${whereClause}`,
+    [paramValue]
   );
 
   if (placeResult.rows.length === 0) {
@@ -68,7 +77,7 @@ async function getPlaceById(request, reply) {
        AND m.deleted_at IS NULL
      ORDER BY m.created_at DESC
      LIMIT 10`,
-    [id]
+    [row.id]
   );
 
   const recentMessages = msgsResult.rows.map((m) => ({

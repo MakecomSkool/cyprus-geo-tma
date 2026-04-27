@@ -18,6 +18,8 @@ import searchRoutes from "./routes/search.js";
 import reviewsRoutes from "./routes/reviews.js";
 import tilesRoutes from "./routes/tiles.js";
 import usersRoutes from "./routes/users.js";
+import wmProxyRoutes from "./routes/wmProxy.js";
+import geojsonRoutes from "./routes/geojson.js";
 import { setupSocketIO } from "./ws.js";
 
 // ── Create Fastify with pino logger ────────────────────────────
@@ -79,6 +81,8 @@ await fastify.register(searchRoutes);
 await fastify.register(reviewsRoutes);
 await fastify.register(tilesRoutes);
 await fastify.register(usersRoutes);
+await fastify.register(wmProxyRoutes);
+await fastify.register(geojsonRoutes);
 
 // ── Socket.IO (attached to the raw HTTP server) ────────────────
 const io = setupSocketIO(fastify.server, fastify);

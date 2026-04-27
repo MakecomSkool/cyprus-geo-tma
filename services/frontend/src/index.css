@@ -1,5 +1,6 @@
 @import "tailwindcss";
-@import "mapbox-gl/dist/mapbox-gl.css";
+/* Leaflet CSS imported in MapCanvas.jsx via "leaflet/dist/leaflet.css" */
+
 
 /* ═══════════════════════════════════════════════════════════════
    Cyprus Geo-Social TMA — Design System Tokens
@@ -460,26 +461,85 @@ body,
   backdrop-filter: var(--glass-blur);
 }
 
-/* ── Mapbox Tooltip (Wikimapia-style) ──────────────────────── */
-.place-tooltip .mapboxgl-popup-content {
-  background: rgba(255, 248, 230, 0.95);
-  border: 1px solid rgba(200, 140, 0, 0.5);
-  border-radius: 6px;
-  padding: 5px 10px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #5a3000;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  pointer-events: none;
+/* ── Leaflet Tooltip (Wikimapia-style) ────────────────────── */
+.place-tooltip-leaflet {
+  background: rgba(255, 248, 230, 0.97) !important;
+  border: 1px solid rgba(200, 140, 0, 0.6) !important;
+  border-radius: 6px !important;
+  padding: 5px 10px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: #5a3000 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  pointer-events: none !important;
+  white-space: nowrap !important;
 }
 
-.place-tooltip .mapboxgl-popup-tip {
-  border-top-color: rgba(200, 140, 0, 0.5);
+.place-tooltip-leaflet::before {
+  display: none !important;
 }
 
-/* ── Map container ─────────────────────────────────────────── */
+/* ── Map container ─────────────────────────────────────────────── */
 .map-container {
   width: 100%;
   height: 100%;
 }
 
+/* ── Wikimapia-style place picker popup ────────────────────────── */
+.wm-picker-popup .leaflet-popup-content-wrapper {
+  padding: 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.20);
+  border: 1px solid rgba(0,0,0,0.12);
+  overflow: hidden;
+}
+
+.wm-picker-popup .leaflet-popup-content {
+  margin: 0;
+  min-width: 180px;
+}
+
+.wm-picker {
+  display: flex;
+  flex-direction: column;
+}
+
+.wm-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: #222;
+  background: white;
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+  transition: background 0.1s;
+  user-select: none;
+}
+
+.wm-picker-item:last-child {
+  border-bottom: none;
+}
+
+.wm-picker-item:hover {
+  background: #fff8e8;
+  color: #b05000;
+}
+
+.wm-picker-item:active {
+  background: #ffe0b0;
+}
+
+.wm-picker-icon {
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.wm-picker-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
